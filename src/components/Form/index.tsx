@@ -131,17 +131,18 @@ const Form: React.FC = () => {
       .post('session', { email, password })
       .then((response) => response.data)
       .then((data) => {
+        clearStates()
         AsyncStorage.setItem('@storage_token', data.token).then(() => {
-          nav.navigate('Home')
+          nav.navigate('App')
         })
       })
       .catch((error) => {
+        clearStates()
         console.log(error)
         Alert.alert('Error', 'Erro ao logar', [{ text: 'OK' }], {
           cancelable: false,
         })
       })
-    clearStates()
   }
 
   async function submitAction() {

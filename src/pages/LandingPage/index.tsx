@@ -9,7 +9,7 @@ import {
   TGLTitle,
 } from './styles'
 
-const SignInPage: React.FC = () => {
+const LandingPage: React.FC = () => {
   return (
     <Container>
       <TGLContainer>
@@ -24,4 +24,4 @@ const SignInPage: React.FC = () => {
   )
 }
 
-export default SignInPage
+export default LandingPage

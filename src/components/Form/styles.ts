@@ -22,7 +22,6 @@ export const Card = styled.View`
 
   shadow-opacity: 0.75;
   shadow-radius: 5px;
-  shadow-color: red;
   shadow-offset: 0px 0px;
   elevation: 3;
 `
