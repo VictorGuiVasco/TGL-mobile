@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
-interface BetsProps {
+interface GamesProps {
   id: number
   type: string
   description: string
@@ -11,19 +11,19 @@ interface BetsProps {
   min_cart_value: number
 }
 
-const initialState: Array<BetsProps> = []
+const initialState: Array<GamesProps> = []
 
-const betsSlice = createSlice({
-  name: 'bets',
+const gamesSlice = createSlice({
+  name: 'games',
   initialState,
   reducers: {
-    saveBets(state, action: PayloadAction<BetsProps>) {
+    saveGames(state, action: PayloadAction<GamesProps>) {
       if (state.length === 3) return
       state.push(action.payload)
     },
   },
 })
 
-export const betAction = betsSlice.actions
+export const gameAction = gamesSlice.actions
 
-export default betsSlice.reducer
+export default gamesSlice.reducer

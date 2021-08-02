@@ -1,16 +1,21 @@
-import { betAction } from '../slices/betsSlices'
+import { gameAction } from '../slices/gamesSlice'
 
 import { AppDispatch, AppThunk } from '../'
 
-import Cookies from 'universal-cookie'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import api from '../../services/api'
 
-export function fetchBets(): AppThunk {
+export function fetchGames(): AppThunk {
   return async function (dispatch: AppDispatch) {
-    const cookies = new Cookies()
+    let token = ''
+    const value = await AsyncStorage.getItem('@storage_token')
+    if (value !== null) {
+      token = value
+    }
+
     const config = {
       headers: {
-        Authorization: `Bearer ${cookies.get('token')}`,
+        Authorization: `Bearer ${token}`,
       },
     }
     api
@@ -20,7 +25,7 @@ export function fetchBets(): AppThunk {
       })
       .then((data) => {
         for (let value in data.data) {
-          dispatch(betAction.saveBets(data.data[value]))
+          dispatch(gameAction.saveGames(data.data[value]))
         }
       })
       .catch((error) => {

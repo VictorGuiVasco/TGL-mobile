@@ -1,12 +1,12 @@
 import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit'
 import { useDispatch } from 'react-redux'
 
-import betsSlice from './slices/betsSlices'
+import gamesSlice from './slices/gamesSlice'
 import usersSlice from './slices/usersSlice'
 
 const store = configureStore({
   reducer: {
-    bets: betsSlice,
+    games: gamesSlice,
     users: usersSlice,
   },
 })
