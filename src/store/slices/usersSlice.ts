@@ -17,7 +17,6 @@ const usersSlice = createSlice({
       state.username = action.payload.username
       state.email = action.payload.email
     },
-    updateUser(state, action: PayloadAction<UsersProps>) {},
   },
 })
 

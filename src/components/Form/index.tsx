@@ -1,10 +1,13 @@
 import React, { useState } from 'react'
 import { Alert } from 'react-native'
 import { AntDesign } from '@expo/vector-icons'
+
+import { useDispatch } from 'react-redux'
 import { useNavigation } from '@react-navigation/native'
 
-import AsyncStorage from '@react-native-async-storage/async-storage'
+import { saveUser } from '../../store/actions/usersActions'
 
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import api from '../../services/api'
 
 import {
@@ -21,6 +24,7 @@ import {
 } from './styles'
 
 const Form: React.FC = () => {
+  const dispatch = useDispatch()
   const nav = useNavigation()
 
   const [type, setType] = useState('auth')
@@ -132,6 +136,7 @@ const Form: React.FC = () => {
       .then((response) => response.data)
       .then((data) => {
         clearStates()
+        dispatch(saveUser())
         AsyncStorage.setItem('@storage_token', data.token).then(() => {
           nav.navigate('App')
         })
