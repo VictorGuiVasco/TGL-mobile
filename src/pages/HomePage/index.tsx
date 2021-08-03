@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../store'
 import { fetchGames } from '../../store/actions/gameActions'
 
+import Header from '../../components/Header'
 import GameButton from '../../components/GameButton'
 import GameCard from '../../components/GameCard'
 
@@ -119,6 +120,7 @@ const HomePage: React.FC = () => {
 
   return (
     <Container>
+      <Header />
       <Title>RECENT GAMES</Title>
       <Text>Filters</Text>
 
@@ -128,7 +130,11 @@ const HomePage: React.FC = () => {
           games.map((elem, index) => (
             <GameButton
               key={index}
-              type={elem.type}
+              type={
+                selectedGame.find((game) => game?.id === elem.id)
+                  ? elem.type + ' *'
+                  : elem.type
+              }
               borderColor={elem.color}
               fontColor={
                 !selectedGame.find((game) => game?.id === elem.id)

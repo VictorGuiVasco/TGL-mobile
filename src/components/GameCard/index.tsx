@@ -1,7 +1,14 @@
 import React from 'react'
-import { Platform } from 'react-native'
 
-import { Bar, Container, Numbers, Text, TypeText, View } from './styles'
+import {
+  Bar,
+  Container,
+  Numbers,
+  Text,
+  TextView,
+  TypeText,
+  View,
+} from './styles'
 
 interface GameCardProps {
   type: string
@@ -17,6 +24,7 @@ const GameCard: React.FC<GameCardProps> = ({
   date,
   price,
   color,
+  children,
 }) => {
   const currency = Number(price)
     .toFixed(2)
@@ -27,9 +35,12 @@ const GameCard: React.FC<GameCardProps> = ({
       <Bar color={color} />
       <View>
         <Numbers>{numbers}</Numbers>
-        <Text>
-          {date} - (R$ {currency})
-        </Text>
+        <TextView>
+          <Text>
+            {date} - (R$ {currency})
+          </Text>
+          {children}
+        </TextView>
         <TypeText color={color}>{type}</TypeText>
       </View>
     </Container>

@@ -3,8 +3,6 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 export const Container = styled.SafeAreaView`
   flex: 1;
-  padding-right: 20px;
-  padding-left: 20px;
 `
 
 export const Scroll = styled.ScrollView``
@@ -12,6 +10,7 @@ export const Scroll = styled.ScrollView``
 export const Title = styled.Text`
   margin-top: 26px;
   margin-bottom: 15px;
+  padding-left: 20px;
 
   font-size: 22px;
   font-weight: bold;
@@ -23,6 +22,7 @@ export const Title = styled.Text`
 export const Text = styled.Text`
   font-size: 17px;
   font-style: italic;
+  padding-left: 20px;
 
   color: #868686;
 `
@@ -32,4 +32,5 @@ export const ButtonContainer = styled.View`
 
   margin-top: 15px;
   margin-bottom: 26px;
+  padding-left: 20px;
 `

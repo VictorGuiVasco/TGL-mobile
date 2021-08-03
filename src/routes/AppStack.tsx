@@ -3,9 +3,6 @@ import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 
-import HeaderLogo from '../components/HeaderLogo'
-import LogoutButton from '../components/LogoutButton'
-
 import AppTabs from './AppTabs'
 import LandingPage from '../pages/LandingPage'
 
@@ -41,18 +38,7 @@ function AppStack() {
           screenOptions={{ headerShown: false }}
         >
           <Screen name="Landing" component={LandingPage} />
-          <Screen
-            name="App"
-            component={AppTabs}
-            options={{
-              headerShown: true,
-              headerStyle: {
-                height: 110,
-              },
-              headerTitle: () => <HeaderLogo />,
-              headerRight: () => <LogoutButton />,
-            }}
-          />
+          <Screen name="App" component={AppTabs} />
         </Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

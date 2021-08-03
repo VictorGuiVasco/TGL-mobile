@@ -7,6 +7,7 @@ interface StyleProps {
 export const Container = styled.View`
   height: 80px;
   margin-bottom: 25px;
+  padding-left: 20px;
 
   flex-direction: row;
 `
@@ -24,6 +25,10 @@ export const View = styled.View`
   justify-content: space-evenly;
 `
 
+export const TextView = styled.View`
+  flex-direction: row;
+`
+
 export const Numbers = styled.Text`
   font-size: 12px;
   font-weight: bold;
@@ -35,6 +40,7 @@ export const Numbers = styled.Text`
 export const Text = styled.Text`
   font-size: 12px;
   color: #868686;
+  margin-right: 80px;
 `
 
 export const TypeText = styled.Text<StyleProps>`

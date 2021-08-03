@@ -3,6 +3,7 @@ import styled from 'styled-components/native'
 export const TGLContainer = styled.View`
   width: 75px;
   justify-content: center;
+  padding-left: 20px;
 `
 
 export const TGLTitle = styled.Text`

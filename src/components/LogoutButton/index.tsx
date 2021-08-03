@@ -15,7 +15,7 @@ const LogoutButton: React.FC = () => {
   }
 
   return (
-    <RectButton style={{ marginRight: 20 }} onPress={logoutHandler}>
+    <RectButton style={{ marginHorizontal: 20 }} onPress={logoutHandler}>
       <Feather name="log-out" size={30} color="#C1C1C1" />
     </RectButton>
   )

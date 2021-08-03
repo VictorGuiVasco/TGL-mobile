@@ -19,7 +19,7 @@ function AppTabs() {
     <Navigator
       tabBarOptions={{
         style: {
-          elevation: 0,
+          elevation: 2,
           height: 68,
           borderTopWidth: 0,
           borderTopLeftRadius: 25,
