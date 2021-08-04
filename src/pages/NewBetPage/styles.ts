@@ -14,6 +14,7 @@ export const Container = styled.SafeAreaView`
 
 export const Scroll = styled(FlatList)<StyleProps>`
   padding-left: 20px;
+  padding-right: 20px;
   height: ${(props) => (!!props.height ? props.height : 0)};
 `
 

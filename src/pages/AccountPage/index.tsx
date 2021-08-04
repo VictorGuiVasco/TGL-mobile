@@ -39,6 +39,12 @@ const AccountPage: React.FC = () => {
       email: !!email ? email : users?.email,
     }
 
+    if (!emailValidation(email)) {
+      Alert.alert('Alert', 'Email invalido', [{ text: 'OK' }], {
+        cancelable: false,
+      })
+    }
+
     const value = await AsyncStorage.getItem('@storage_token')
     if (value !== null) {
       const config = {

@@ -6,6 +6,7 @@ import { useDispatch } from 'react-redux'
 import { useNavigation } from '@react-navigation/native'
 
 import { saveUser } from '../../store/actions/usersActions'
+import { emailValidation } from '../../utils/emailValidation'
 
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import api from '../../services/api'
@@ -73,6 +74,12 @@ const Form: React.FC = () => {
       return
     }
 
+    if (!emailValidation(email)) {
+      Alert.alert('Alert', 'Email invalido', [{ text: 'OK' }], {
+        cancelable: false,
+      })
+    }
+
     api
       .post('users', {
         username,
@@ -105,6 +112,12 @@ const Form: React.FC = () => {
       return
     }
 
+    if (!emailValidation(email)) {
+      Alert.alert('Alert', 'Email invalido', [{ text: 'OK' }], {
+        cancelable: false,
+      })
+    }
+
     api
       .post('password', {
         email,
@@ -129,6 +142,12 @@ const Form: React.FC = () => {
         cancelable: false,
       })
       return
+    }
+
+    if (!emailValidation(email)) {
+      Alert.alert('Alert', 'Email invalido', [{ text: 'OK' }], {
+        cancelable: false,
+      })
     }
 
     api
