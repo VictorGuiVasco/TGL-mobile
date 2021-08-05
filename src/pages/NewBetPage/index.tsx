@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
+import { useNavigation } from '@react-navigation/native'
+
 import { BorderlessButton } from 'react-native-gesture-handler'
 
 import { Alert, Modal } from 'react-native'
@@ -9,9 +11,9 @@ import { RootState } from '../../store'
 
 import Cart from '../../components/Cart'
 import Header from '../../components/Header'
+import AlertModal from '../../components/AlertModal'
 import GameButton from '../../components/GameButton'
 
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import api from '../../services/api'
 
 import { Ionicons } from '@expo/vector-icons'
@@ -43,23 +45,22 @@ interface BetsProps {
 }
 
 const NewBetPage: React.FC = () => {
+  const nav = useNavigation()
   const games = useSelector((state: RootState) => state.games)
 
   const [indexGame, setIndexGame] = useState(0)
   const [numberSelected, setNumberSelected] = useState<number[]>([])
   const [cartData, setCartData] = useState<BetsProps[]>([])
   const [actualPrice, setActualPrice] = useState(0)
-  const [localePrice, setLocalePrice] = useState('')
   const [showCart, setShowCart] = useState(false)
 
-  const selectedGame = games[indexGame]
+  const [alertType, setAlertType] = useState('')
+  const [alertTitle, setAlertTitle] = useState('')
+  const [alertDescription, setAlertDescription] = useState('')
 
-  useEffect(() => {
-    const price = Number(actualPrice)
-      .toFixed(2)
-      .replace(/\d(?=(\d{3})+\.)/g, '$&,')
-    setLocalePrice(price)
-  }, [actualPrice])
+  const [showAlert, setShowAlert] = useState(false)
+
+  const selectedGame = games[indexGame]
 
   function getRandomIntInclusive(max: number, arr: number[]) {
     var num = Math.ceil(Math.random() * max)
@@ -80,9 +81,7 @@ const NewBetPage: React.FC = () => {
       temp.splice(numberSelected.indexOf(num), 1)
       setNumberSelected(temp)
     } else if (numberSelected.length === selectedGame.max_number) {
-      Alert.alert('Alert', 'Cartela cheia', [{ text: 'OK' }], {
-        cancelable: false,
-      })
+      setStatesToModal('', 'Cartela cheia')
     } else {
       setNumberSelected([...numberSelected, num])
     }
@@ -117,15 +116,11 @@ const NewBetPage: React.FC = () => {
       let wordLeft = numOfEmptySpaces === 1 ? 'Falta' : 'Faltam'
       let wordNumber = numOfEmptySpaces === 1 ? 'número' : 'números'
 
-      Alert.alert(
+      setStatesToModal(
+        '',
         'Preencha a cartela',
-        `${wordLeft} ${numOfEmptySpaces} ${wordNumber}`,
-        [{ text: 'OK' }],
-        {
-          cancelable: false,
-        }
+        `${wordLeft} ${numOfEmptySpaces} ${wordNumber}`
       )
-
       return
     }
 
@@ -157,39 +152,46 @@ const NewBetPage: React.FC = () => {
 
   async function saveBet() {
     if (actualPrice === 0) {
-      Alert.alert('Alert', 'Preencha o cart', [{ text: 'OK' }], {
-        cancelable: false,
-      })
-      return
+      setStatesToModal('error', 'Preencha o carrinho')
     } else if (actualPrice < 30) {
-      Alert.alert('Alert', 'Compre no minimo R$ 30,00', [{ text: 'OK' }], {
-        cancelable: false,
-      })
-      return
+      setStatesToModal(
+        'error',
+        'Preço insuficiente',
+        'Compre no minimo R$ 30,00'
+      )
     } else {
-      const value = await AsyncStorage.getItem('@storage_token')
-      if (value !== null) {
-        const config = {
-          headers: {
-            Authorization: `Bearer ${value}`,
-          },
-        }
-
-        api
-          .post('bets', cartData, config)
-          .then((response) => {
-            return response.data
-          })
-          .then((data) => {
-            setCartData([])
-            setActualPrice(0)
-            Alert.alert('Parabéns pela compra.')
-          })
-          .catch((error) => {
-            console.log(error)
-          })
+      try {
+        //await api.post('bets', cartData)
+        setCartData([])
+        setActualPrice(0)
+        setStatesToModal('success', 'Parabéns pela compra')
+      } catch (error) {
+        setStatesToModal('error', 'Erro ao comprar')
       }
     }
+  }
+
+  function setStatesToModal(_type = '', _title = '', _description = '') {
+    setAlertType(_type)
+    setAlertTitle(_title)
+    setAlertDescription(_description)
+    setShowAlert(true)
+  }
+
+  function closeAlert() {
+    if (alertType === 'success') {
+      setAlertType('')
+      setAlertTitle('')
+      setAlertDescription('')
+      setShowAlert(false)
+      setShowCart(false)
+      nav.navigate('Home')
+      return
+    }
+    setAlertType('')
+    setAlertTitle('')
+    setAlertDescription('')
+    setShowAlert(false)
   }
 
   let range = []
@@ -199,24 +201,6 @@ const NewBetPage: React.FC = () => {
 
   return (
     <Container>
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={showCart}
-        onRequestClose={() => {
-          setShowCart(!showCart)
-        }}
-      >
-        <Cart
-          deleteGame={deleteGame}
-          games={games}
-          cartData={cartData}
-          actualPrice={actualPrice}
-          setShow={setShowCart}
-          saveBet={saveBet}
-        />
-      </Modal>
-
       <Header>
         {numberSelected.length !== 0 || cartData.length !== 0 ? (
           <BorderlessButton onPress={() => setShowCart(!showCart)}>
@@ -301,6 +285,26 @@ const NewBetPage: React.FC = () => {
           </NumberButton>
         )}
       />
+
+      <Modal animationType="fade" transparent={true} visible={showCart}>
+        <Cart
+          deleteGame={deleteGame}
+          games={games}
+          cartData={cartData}
+          actualPrice={actualPrice}
+          setShow={setShowCart}
+          saveBet={saveBet}
+        />
+      </Modal>
+
+      <Modal animationType="fade" transparent={true} visible={showAlert}>
+        <AlertModal
+          type={alertType}
+          title={alertTitle}
+          description={alertDescription}
+          onClickButton={closeAlert}
+        />
+      </Modal>
     </Container>
   )
 }

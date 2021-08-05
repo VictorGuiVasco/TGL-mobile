@@ -1,5 +1,7 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import Form from '../../components/Form'
+
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 import {
   Container,
@@ -10,6 +12,12 @@ import {
 } from './styles'
 
 const LandingPage: React.FC = () => {
+  async function setTokenToNull() {
+    await AsyncStorage.setItem('@storage_token', '')
+  }
+
+  useEffect(() => {}, [])
+
   return (
     <Container>
       <TGLContainer>

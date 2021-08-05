@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Alert } from 'react-native'
+import { Modal } from 'react-native'
 import { AntDesign } from '@expo/vector-icons'
 
 import { useDispatch } from 'react-redux'
@@ -7,6 +7,8 @@ import { useNavigation } from '@react-navigation/native'
 
 import { saveUser } from '../../store/actions/usersActions'
 import { emailValidation } from '../../utils/emailValidation'
+
+import AlertModal from '../../components/AlertModal'
 
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import api from '../../services/api'
@@ -35,6 +37,12 @@ const Form: React.FC = () => {
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+
+  const [alertType, setAlertType] = useState('')
+  const [alertTitle, setAlertTitle] = useState('')
+  const [alertDescription, setAlertDescription] = useState('')
+
+  const [showAlert, setShowAlert] = useState(false)
 
   function clearStates() {
     setUsername('')
@@ -66,117 +74,109 @@ const Form: React.FC = () => {
     clearStates()
   }
 
-  function registerUser() {
+  async function registerUser() {
     if (email.length === 0 || password.length === 0 || username.length === 0) {
-      Alert.alert('Alert', 'Preencha todos os campos', [{ text: 'OK' }], {
-        cancelable: false,
-      })
+      setStatesToModal('error', 'Preencha todos os campos')
       return
     }
 
     if (!emailValidation(email)) {
-      Alert.alert('Alert', 'Email invalido', [{ text: 'OK' }], {
-        cancelable: false,
-      })
+      setStatesToModal('error', 'Digite um email válido')
+      return
     }
 
-    api
-      .post('users', {
-        username,
-        email,
-        password,
-      })
-      .then((response) => {
-        Alert.alert(
-          'Success',
-          'Cadastro realizado com sucesso',
-          [{ text: 'OK' }],
-          {
-            cancelable: false,
-          }
-        )
-      })
-      .catch((error) => {
-        Alert.alert('Error', 'Erro ao cadastrar', [{ text: 'OK' }], {
-          cancelable: false,
-        })
-      })
-    clearStates()
+    try {
+      await api.post('users', { username, email, password })
+      clearStates()
+
+      setStatesToModal(
+        'success',
+        'Cadastrado',
+        'Usuário cadastrado com sucesso'
+      )
+    } catch (error) {
+      setStatesToModal('error', 'Erro', 'Erro ao cadastrar')
+    }
   }
 
-  function sendEmail() {
+  async function sendEmailToResetPassword() {
     if (email.length === 0) {
-      Alert.alert('Alert', 'Preencha todos os campos', [{ text: 'OK' }], {
-        cancelable: false,
-      })
+      setStatesToModal('error', 'Preencha todos os campos')
       return
     }
 
     if (!emailValidation(email)) {
-      Alert.alert('Alert', 'Email invalido', [{ text: 'OK' }], {
-        cancelable: false,
-      })
+      setStatesToModal('error', 'O campo não é um email')
+      return
     }
 
-    api
-      .post('password', {
+    try {
+      await api.post('password', {
         email,
         redirect_url: 'http://localhost:3000',
       })
-      .then(() => {
-        Alert.alert('Success', 'Email enviado', [{ text: 'OK' }], {
-          cancelable: false,
-        })
-      })
-      .catch((error) => {
-        Alert.alert('Err', 'Email invalido', [{ text: 'OK' }], {
-          cancelable: false,
-        })
-      })
-    clearStates()
+      clearStates()
+
+      setStatesToModal(
+        'success',
+        'Email enviado',
+        'Cheque seu email para mais informações'
+      )
+    } catch (error) {
+      setStatesToModal('error', 'Email invalido')
+    }
   }
 
   async function saveSession() {
     if (email.length === 0 || password.length === 0) {
-      Alert.alert('Alert', 'Preencha todos os campos', [{ text: 'OK' }], {
-        cancelable: false,
-      })
+      setStatesToModal('error', 'Preencha todos os campos')
       return
     }
 
     if (!emailValidation(email)) {
-      Alert.alert('Alert', 'Email invalido', [{ text: 'OK' }], {
-        cancelable: false,
-      })
+      setStatesToModal('error', 'Digite um email válido')
+      return
     }
 
-    api
-      .post('session', { email, password })
-      .then((response) => response.data)
-      .then((data) => {
-        clearStates()
-        dispatch(saveUser())
-        AsyncStorage.setItem('@storage_token', data.token).then(() => {
-          nav.navigate('App')
-        })
-      })
-      .catch((error) => {
-        clearStates()
-        console.log(error)
-        Alert.alert('Error', 'Erro ao logar', [{ text: 'OK' }], {
-          cancelable: false,
-        })
-      })
+    try {
+      const response = await api.post('session', { email, password })
+      await AsyncStorage.setItem('@storage_token', response.data.token)
+
+      clearStates()
+      dispatch(saveUser())
+      nav.navigate('App')
+    } catch (error) {
+      setStatesToModal(
+        'error',
+        'Erro ao logar',
+        'Cheque se as informações estão certas'
+      )
+    }
   }
 
   async function submitAction() {
+    setEmail(email.toLowerCase())
     if (type === 'register') {
       registerUser()
     } else if (type === 'forget-password') {
-      sendEmail()
+      sendEmailToResetPassword()
     } else if (type === 'auth') {
       saveSession()
     }
+  }
+
+  function setStatesToModal(_type = '', _title = '', _description = '') {
+    setAlertType(_type)
+    setAlertTitle(_title)
+    setAlertDescription(_description)
+    setShowAlert(true)
+  }
+
+  function closeAlert() {
+    setAlertType('')
+    setAlertTitle('')
+    setAlertDescription('')
+    setShowAlert(false)
   }
 
   return (
@@ -248,6 +248,15 @@ const Form: React.FC = () => {
           </Button>
         </>
       )}
+
+      <Modal animationType="fade" transparent={true} visible={showAlert}>
+        <AlertModal
+          type={alertType}
+          title={alertTitle}
+          description={alertDescription}
+          onClickButton={closeAlert}
+        />
+      </Modal>
     </Container>
   )
 }

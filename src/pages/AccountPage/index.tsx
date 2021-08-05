@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from 'react'
+import { Modal } from 'react-native'
+
 import { useDispatch, useSelector } from 'react-redux'
 
 import { AntDesign } from '@expo/vector-icons'
 
 import Header from '../../components/Header'
+import AlertModal from '../../components/AlertModal'
 
 import { RootState } from '../../store'
 import { saveUser } from '../../store/actions/usersActions'
+import { emailValidation } from '../../utils/emailValidation'
 
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import api from '../../services/api'
 
 import {
@@ -26,47 +29,58 @@ const AccountPage: React.FC = () => {
   const dispatch = useDispatch()
   const users = useSelector((state: RootState) => state.users)
 
+  const [username, setUsername] = useState('')
+  const [email, setEmail] = useState('')
+
+  const [type, setType] = useState('')
+  const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
+
+  const [showAlert, setShowAlert] = useState(false)
+
   useEffect(() => {
     dispatch(saveUser())
   }, [])
 
-  const [username, setUsername] = useState('')
-  const [email, setEmail] = useState('')
-
   async function submitAction() {
+    if (email.length === 0 && username.length === 0) {
+      setStatesToModal('error', 'Preencha os campos')
+      return
+    }
+
+    setEmail(email.toLowerCase())
     const data = {
       username: !!username ? username : users?.username,
       email: !!email ? email : users?.email,
     }
 
-    if (!emailValidation(email)) {
-      Alert.alert('Alert', 'Email invalido', [{ text: 'OK' }], {
-        cancelable: false,
-      })
+    if (!!email && !emailValidation(email)) {
+      setStatesToModal('error', 'O campo não é um email')
+      return
     }
 
-    const value = await AsyncStorage.getItem('@storage_token')
-    if (value !== null) {
-      const config = {
-        headers: {
-          Authorization: `Bearer ${value}`,
-        },
-      }
+    try {
+      await api.put(`users/${users?.id}`, data)
+      dispatch(saveUser())
 
-      api
-        .put(`users/${users?.id}`, data, config)
-        .then((response) => {
-          return response.data
-        })
-        .then((data) => {
-          console.log(`users/${users?.id}`)
-          dispatch(saveUser())
-          alert('Dados atualizados')
-        })
-        .catch((error) => {
-          console.log(error)
-        })
+      setStatesToModal('success', 'Success', 'Dados atualizados')
+    } catch (error) {
+      setStatesToModal('error', 'Erro', 'Ocorreu um erro ao salvar')
     }
+  }
+
+  function setStatesToModal(_type = '', _title = '', _description = '') {
+    setType(_type)
+    setTitle(_title)
+    setDescription(_description)
+    setShowAlert(true)
+  }
+
+  function closeAlert() {
+    setType('')
+    setTitle('')
+    setDescription('')
+    setShowAlert(false)
   }
 
   return (
@@ -100,6 +114,15 @@ const AccountPage: React.FC = () => {
           </Button>
         </Card>
       </FormContainer>
+
+      <Modal animationType="fade" transparent={true} visible={showAlert}>
+        <AlertModal
+          type={type}
+          title={title}
+          description={description}
+          onClickButton={closeAlert}
+        />
+      </Modal>
     </Container>
   )
 }
